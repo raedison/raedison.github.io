@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Ruth Edison</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on Ruth Edison</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Data Wrangling and Data Exploration of UT Admissions Data</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Data Wrangling and Data Exploration of UT Admissions Data In my quest for related data, I settled on a pair of data sets concerning the admissions data for the various colleges in the University of Texas system. The first data set looked at various standardized test scores for the incoming classes of each school for the years 2013-2019. The second data set looked at the admission statistics for the incoming classes of each school for the years 2011-2019, breaking down the numbers for applicants, accepted students, and everything in between.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting with Pokemon</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction I decided to use the Pokemon dataset in R for this project since as a gamer, it seemed like a lot of fun to be able to bring my hobbies into class. My categorical variables are Generation since there are 6 generations of Pokemon, and Legendary status, or whether a given Pokemon is legendary or not. Technically, Generation registers as an integer column in the dataset, but as Generation is a title not a value, it still classifies as a categorical variable.</description>
+    </item>
+    
+  </channel>
+</rss>

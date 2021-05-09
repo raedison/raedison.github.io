@@ -1,0 +1,44 @@
+---
+title: Blog Post
+author: 'Ruth Edison'
+date: '2021-05-09'
+slug: blog-post
+categories: []
+tags: []
+description: ''
+---
+(/project/project1/)
+(https://www.google.com)
+```{r}
+quakes
+head(quakes)
+nrow(quakes)
+ncol(quakes)
+fivenum(quakes$mag)
+mean(quakes$mag)
+fivenum(quakes$depth)
+mean(quakes$depth)
+```
+```{python}
+import numpy as np
+x=np.random.normal(0,1,50)
+y=np.random.normal(0,1,50)
+```
+
+```{r}
+library(reticulate)
+hi <- "Hello"
+```
+
+```{python}
+hi = "world"
+print(r.hi,hi)
+```
+
+```{r}
+cat(c(hi, py$hi))
+library(ggplot2)
+ggplot()+geom_point(aes(py$x,py$y))
+```
+
+![](/post/2021-05-09-blog-post_files/32944b97f5b45ee37b4ff57388a4ff7c.jpg)

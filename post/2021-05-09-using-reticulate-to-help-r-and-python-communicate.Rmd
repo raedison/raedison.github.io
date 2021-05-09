@@ -1,0 +1,9 @@
+---
+title: Using Reticulate to Help R and Python Communicate
+author: Ruth Edison
+date: '2021-05-09'
+slug: using-reticulate-to-help-r-and-python-communicate
+categories: []
+tags: []
+description: ''
+---

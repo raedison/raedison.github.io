@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Ruth Edison" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Data Wrangling and Data Exploration of UT Admissions Data</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Data Wrangling and Data Exploration of UT Admissions Data</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="data-wrangling-and-data-exploration-of-ut-admissions-data" class="section level2">
+<h2>Data Wrangling and Data Exploration of UT Admissions Data</h2>
+<p>In my quest for related data, I settled on a pair of data sets concerning the admissions data for the various colleges in the University of Texas system. The first data set looked at various standardized test scores for the incoming classes of each school for the years 2013-2019. The second data set looked at the admission statistics for the incoming classes of each school for the years 2011-2019, breaking down the numbers for applicants, accepted students, and everything in between. I chose these two data sets to see if I could find a correlation between standardized test score averages per year and how high a school’s average acceptance rate is that year. I expect a higher average score on standardized tests to correlate with a higher acceptance rate. This interested me both as a student who applied to multiple UT System schools and also since my brother applied to many of them as well during the most recent application cycles. I could definitely see differences, some of which were definitely due to the pandemic, and wanted to see what I could find out about the statistics. I’d originally wanted to look at similar data but for law schools since I applied to law school this past cycle but LSAC doesn’t make the raw data available to the public, only the finished statistics.*</p>
+<p>In order to prepare the two datasets for joining, some tidying was necessary. For the test scores data set, since there was a lot of data presented, I decided to focus on the variable of average SAT score for each year, so I selected for just that column. I then made the years between 2013 and 2019 the columns instead, by widening, so it would make for a better comparison to the other data and a cleaner format. For the admissions data set, the first problem I had was that the dataset focused on the years 2011-2019 which wouldn’t match the test scores data, so before bringing the data into R, I removed the rows containing data for 2011 and 2012. Since there was a lot of data presented, I decided to focus on the variable of percentage of acceptance and therefore selected for just that column. Again I widened the data to make the columns organized by year to clean up the formatting and make the data more concise.</p>
+<pre class="r"><code>admissionsdata &lt;- read.csv(&quot;admissionsdata.csv&quot;)
+testscores &lt;- read.csv(&quot;testscores.csv&quot;)</code></pre>
+<pre class="r"><code>library(dplyr)
+library(tidyverse)
+admission_all &lt;- admissionsdata[admissionsdata$RACE == &quot;All&quot;, 
+    ]
+admissiondata &lt;- admission_all %&gt;% select(UTBranch = UT_SHORT_NAME, 
+    PCT_Acceptance_Year = YEAR, PCT_Acceptance = PCT_ACCEPTANCE) %&gt;% 
+    filter(UTBranch != &quot;UT Rio Grande Valley&quot;)
+admissions_data &lt;- admissiondata %&gt;% pivot_wider(names_from = &quot;PCT_Acceptance_Year&quot;, 
+    values_from = &quot;PCT_Acceptance&quot;) %&gt;% mutate_all(function(x) str_replace_all(x, 
+    &quot;%&quot;, &quot;&quot;)) %&gt;% mutate_at(2:8, as.numeric)</code></pre>
+<pre class="r"><code>TS &lt;- testscores %&gt;% select(UTBranch = UT_SHORT_NAME, Year, &quot;SAT.Average.Score&quot;)
+testscore &lt;- TS %&gt;% pivot_wider(names_from = &quot;Year&quot;, values_from = &quot;SAT.Average.Score&quot;)
+glimpse(testscore)</code></pre>
+<pre><code>## Rows: 10
+## Columns: 8
+## $ UTBranch &lt;fct&gt; UT Arlington, UT Austin, UT Brownsville, UT Dallas, UT El Pa…
+## $ `2013`   &lt;int&gt; 1060, 1261, 907, 1261, 922, 961, 1020, NA, 1061, 1066
+## $ `2014`   &lt;int&gt; 1053, 1287, 925, 1256, 936, 965, 988, NA, 1046, 1061
+## $ `2015`   &lt;int&gt; 1075, 1283, NA, 1257, 935, NA, 974, 948, 1044, 1067
+## $ `2016`   &lt;int&gt; 1076, 1269, NA, 1261, 925, NA, 956, 954, 1033, 1055
+## $ `2017`   &lt;int&gt; 1162, 1264, NA, 1263, 938, NA, 1010, 952, 1047, 1063
+## $ `2018`   &lt;int&gt; 1160, 1360, NA, 1324, 946, NA, 1108, 1041, 1130, 1179
+## $ `2019`   &lt;int&gt; 1147, 1345, NA, 1344, 1011, NA, 1130, 1038, 1126, 1163</code></pre>
+<pre class="r"><code>glimpse(TS)</code></pre>
+<pre><code>## Rows: 58
+## Columns: 3
+## $ UTBranch          &lt;fct&gt; UT Arlington, UT Arlington, UT Arlington, UT Arling…
+## $ Year              &lt;int&gt; 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2013, 201…
+## $ SAT.Average.Score &lt;int&gt; 1060, 1053, 1075, 1076, 1162, 1160, 1147, 1261, 128…</code></pre>
+<p>I joined the data so that there would be an average SAT score and average acceptance percentage for each campus for every year 2013-2019. I dropped UT Rio Grande Valley and UT El Paso since they had incomplete data. I also renamed all the columns post-join to correctly and clearly reflect the data in them, renaming the admissions data to reflect the year and that the numbers in them were admittance percentages and renaming the test score data to reflect the year and their status as mean SAT scores.</p>
+<pre class="r"><code>data &lt;- admissions_data %&gt;% left_join(testscore, by = &quot;UTBranch&quot;)
+dataclean &lt;- data %&gt;% filter(UTBranch == &quot;UT Austin&quot; | UTBranch == 
+    &quot;UT Dallas&quot; | UTBranch == &quot;UT Permian Basin&quot; | UTBranch == 
+    &quot;UT San Antonio&quot; | UTBranch == &quot;UT Tyler&quot; | UTBranch == &quot;UT Arlington&quot;)
+datarenamed &lt;- dataclean %&gt;% rename(`2013_admittance` = &quot;2013.x&quot;, 
+    `2014_admittance` = &quot;2014.x&quot;, `2015_admittance` = &quot;2015.x&quot;, 
+    `2016_admittance` = &quot;2016.x&quot;, `2017_admittance` = &quot;2017.x&quot;, 
+    `2018_admittance` = &quot;2018.x&quot;, `2019_admittance` = &quot;2019.x&quot;, 
+    `2013_sat` = &quot;2013.y&quot;, `2014_sat` = &quot;2014.y&quot;, `2015_sat` = &quot;2015.y&quot;, 
+    `2016_sat` = &quot;2016.y&quot;, `2017_sat` = &quot;2017.y&quot;, `2018_sat` = &quot;2018.y&quot;, 
+    `2019_sat` = &quot;2019.y&quot;)</code></pre>
+<p>I used filter to select the data specifically for UT Austin. I then arranged the data by the branch that they were from. Next, I used select to call up only the data from 2013, but from all branches. I then went on to calculate various summary statistics for the data including means, standard deviations, medians, and inner quantile ranges.</p>
+<pre class="r"><code>datarenamed %&gt;% filter(str_detect(UTBranch, &quot;Austin&quot;))</code></pre>
+<pre><code>## # A tibble: 1 x 15
+##   UTBranch `2013_admittanc… `2014_admittanc… `2015_admittanc… `2016_admittanc…
+##   &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 UT Aust…             45.6             45.3             43.8             46.4
+## # … with 10 more variables: `2017_admittance` &lt;dbl&gt;, `2018_admittance` &lt;dbl&gt;,
+## #   `2019_admittance` &lt;dbl&gt;, `2013_sat` &lt;int&gt;, `2014_sat` &lt;int&gt;,
+## #   `2015_sat` &lt;int&gt;, `2016_sat` &lt;int&gt;, `2017_sat` &lt;int&gt;, `2018_sat` &lt;int&gt;,
+## #   `2019_sat` &lt;int&gt;</code></pre>
+<pre class="r"><code>datarenamed %&gt;% arrange(desc(UTBranch))</code></pre>
+<pre><code>## # A tibble: 6 x 15
+##   UTBranch `2013_admittanc… `2014_admittanc… `2015_admittanc… `2016_admittanc…
+##   &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 UT Tyler             82.1             83.6             64.7             69.3
+## 2 UT San …             62               75.9             77.9             76.4
+## 3 UT Perm…             82.1             86.9             84.6             81.4
+## 4 UT Dall…             69.7             76.9             76.6             75.5
+## 5 UT Aust…             45.6             45.3             43.8             46.4
+## 6 UT Arli…             64.5             66.1             66.4             69.8
+## # … with 10 more variables: `2017_admittance` &lt;dbl&gt;, `2018_admittance` &lt;dbl&gt;,
+## #   `2019_admittance` &lt;dbl&gt;, `2013_sat` &lt;int&gt;, `2014_sat` &lt;int&gt;,
+## #   `2015_sat` &lt;int&gt;, `2016_sat` &lt;int&gt;, `2017_sat` &lt;int&gt;, `2018_sat` &lt;int&gt;,
+## #   `2019_sat` &lt;int&gt;</code></pre>
+<pre class="r"><code>datarenamed %&gt;% select(UTBranch, &quot;2013_admittance&quot;, &quot;2013_sat&quot;)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   UTBranch         `2013_admittance` `2013_sat`
+##   &lt;chr&gt;                        &lt;dbl&gt;      &lt;int&gt;
+## 1 UT Arlington                  64.5       1060
+## 2 UT Austin                     45.6       1261
+## 3 UT Dallas                     69.7       1261
+## 4 UT Permian Basin              82.1       1020
+## 5 UT San Antonio                62         1061
+## 6 UT Tyler                      82.1       1066</code></pre>
+<pre class="r"><code>datarenamed %&gt;% group_by(UTBranch)</code></pre>
+<pre><code>## # A tibble: 6 x 15
+## # Groups:   UTBranch [6]
+##   UTBranch `2013_admittanc… `2014_admittanc… `2015_admittanc… `2016_admittanc…
+##   &lt;chr&gt;               &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 UT Arli…             64.5             66.1             66.4             69.8
+## 2 UT Aust…             45.6             45.3             43.8             46.4
+## 3 UT Dall…             69.7             76.9             76.6             75.5
+## 4 UT Perm…             82.1             86.9             84.6             81.4
+## 5 UT San …             62               75.9             77.9             76.4
+## 6 UT Tyler             82.1             83.6             64.7             69.3
+## # … with 10 more variables: `2017_admittance` &lt;dbl&gt;, `2018_admittance` &lt;dbl&gt;,
+## #   `2019_admittance` &lt;dbl&gt;, `2013_sat` &lt;int&gt;, `2014_sat` &lt;int&gt;,
+## #   `2015_sat` &lt;int&gt;, `2016_sat` &lt;int&gt;, `2017_sat` &lt;int&gt;, `2018_sat` &lt;int&gt;,
+## #   `2019_sat` &lt;int&gt;</code></pre>
+<pre class="r"><code>datarenamed %&gt;% summarize(mean(&quot;2015_admittance&quot;, na.rm = T), 
+    n(), n_distinct(UTBranch))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   `mean(&quot;2015_admittance&quot;, na.rm = T)` `n()` `n_distinct(UTBranch)`
+##                                  &lt;dbl&gt; &lt;int&gt;                  &lt;int&gt;
+## 1                                   NA     6                      6</code></pre>
+<pre class="r"><code>datarenamed %&gt;% summarize(sd(&quot;2017_sat&quot;, na.rm = T), n(), n_distinct(UTBranch))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   `sd(&quot;2017_sat&quot;, na.rm = T)` `n()` `n_distinct(UTBranch)`
+##                         &lt;dbl&gt; &lt;int&gt;                  &lt;int&gt;
+## 1                          NA     6                      6</code></pre>
+<pre class="r"><code>datarenamed %&gt;% summarize(var(&quot;2014_admittance&quot;, na.rm = T), 
+    n(), n_distinct(UTBranch))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   `var(&quot;2014_admittance&quot;, na.rm = T)` `n()` `n_distinct(UTBranch)`
+##                                 &lt;dbl&gt; &lt;int&gt;                  &lt;int&gt;
+## 1                                  NA     6                      6</code></pre>
+<pre class="r"><code>datarenamed %&gt;% summarize(IQR(&quot;2016_admittance&quot;, na.rm = T), 
+    n(), n_distinct(UTBranch))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   `IQR(&quot;2016_admittance&quot;, na.rm = T)` `n()` `n_distinct(UTBranch)`
+##                                 &lt;dbl&gt; &lt;int&gt;                  &lt;int&gt;
+## 1                                  NA     6                      6</code></pre>
+<pre class="r"><code>datarenamed %&gt;% summarize(median(&quot;2019_sat&quot;, na.rm = T), n(), 
+    n_distinct(UTBranch))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   `median(&quot;2019_sat&quot;, na.rm = T)` `n()` `n_distinct(UTBranch)`
+##   &lt;chr&gt;                           &lt;int&gt;                  &lt;int&gt;
+## 1 2019_sat                            6                      6</code></pre>
+<p>Next I created a correlation heatmap of my numeric variables.</p>
+<pre class="r"><code>cors &lt;- datarenamed %&gt;% select_if(is.numeric) %&gt;% cor()
+cors[lower.tri(datarenamed)] &lt;- NA
+cors %&gt;% as.data.frame %&gt;% rownames_to_column %&gt;% pivot_longer(-1) %&gt;% 
+    na.omit %&gt;% ggplot(aes(rowname, name, fill = value)) + geom_tile() + 
+    geom_text(aes(label = round(value, 2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + 
+    coord_fixed() + scale_fill_gradient2(low = &quot;red&quot;, high = &quot;blue&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" />
+The next plot I made was to show the relationship between</p>
+<pre class="r"><code>dataorganize1 &lt;- datarenamed %&gt;% pivot_longer(c(&quot;2013_admittance&quot;, 
+    &quot;2014_admittance&quot;, &quot;2015_admittance&quot;, &quot;2016_admittance&quot;, 
+    &quot;2017_admittance&quot;, &quot;2018_admittance&quot;, &quot;2019_admittance&quot;), 
+    names_to = &quot;admittance_year&quot;, values_to = &quot;percent_admittance&quot;)
+dataoragnize2 &lt;- dataorganize1 %&gt;% pivot_longer(c(&quot;2013_sat&quot;, 
+    &quot;2014_sat&quot;, &quot;2015_sat&quot;, &quot;2016_sat&quot;, &quot;2017_sat&quot;, &quot;2018_sat&quot;, 
+    &quot;2019_sat&quot;), names_to = &quot;year&quot;, values_to = &quot;avg_sat&quot;)</code></pre>
+<p>Then, I made plots showing the correlation between the admittance percentage and SAT score for each year, 2013-2019, in my data set. The data for the different campuses were separated by color as indicated in the legend. You can see, by comparing the data from each year side by side, that the average admittance increased for some campuses, such as UT Arlington, and decreased for others, such as UT Austin. There are also different coordinations based on campus. For example, as UT Arlington’s admittance increased, their average SAT scores also increased, while for UT Austin, as their admissions decreased, their average SAT scores increased.</p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2013_admittance&quot;, &quot;2013_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2013&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2014_admittance&quot;, &quot;2014_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2014&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2015_admittance&quot;, &quot;2015_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2015&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2016_admittance&quot;, &quot;2016_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2016&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2017_admittance&quot;, &quot;2017_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2017&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2018_admittance&quot;, &quot;2018_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2018&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(datarenamed, aes(&quot;2019_admittance&quot;, &quot;2019_sat&quot;)) + geom_point(size = 4, 
+    aes(color = UTBranch)) + ggtitle(&quot;Admittance vs. Average SAT Scores: 2019&quot;) + 
+    xlab(&quot;Percent Admittance&quot;) + ylab(&quot;Average SAT Scores&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-6-7.png" width="672" style="display: block; margin: auto;" />
+This can be interpreted as UT Austin’s admittance policies becoming more tight. As the years go on, the applicant pool consists of higher SAT scores, but they are forced to become more choosy, possibly due to higher volumes of applications and a static amount of seats available to the incoming class every year, so their admittance percentage decreases since they are still able to only admit x amount of students from a growing pool of y applicants.
+In the case of UT Arlington, as a school in UT’s CAP system, when applicants to UT Austin are deferred into the Coordinated Admission Program, or CAP program, many choose to attend UT Arlington. The CAP program is UT’s deferment system, where incoming freshmen are rejected from UT Austin but are provided with the option to accept a spot at one of the other UT campuses in UT’s CAP system for one year before then getting a fast-track to transfer to UT Austin in their sophomore year. This means that the direct product of UT Austin’s acceptance percentage going down, the acceptance percentages at CAP system branches increase.
+The six branches currently a part of the CAP program are UT Arlington, El Paso, Permian Basin, Rio Grande Valley, San Antonio, and Tyler. Of those, four are apart of this study. Looking at their data, you can observe a strong increase in admittance at UT Arlington, and a fluctuating increase at UT San Antonio. UT Permian Basin and Tyler, however, show a decrease in admittance. In addition to this, UT Permian Basin also showed a decrease in average SAT score from 2014 to 2016, before increasing overall with the other schools.
+The general increase of admittance and average SAT scores at the CAP system branches of UT align well with UT Austin’s increased average SAT scores and decreased admittance, as more high-achieving students are “CAP-ed” and have to seek admittance at these other branches.</p>
+<p>I then performed k-means clustering on the data from 2013, 2014, and 2019 respectively.</p>
+<pre class="r"><code>clust_dat2013 &lt;- datarenamed %&gt;% select(&quot;2013_admittance&quot;, &quot;2013_sat&quot;)
+kmeans2013 &lt;- clust_dat2013 %&gt;% kmeans(3)
+kmeans2013</code></pre>
+<pre><code>## K-means clustering with 3 clusters of sizes 1, 3, 2
+## 
+## Cluster means:
+##   2013_admittance 2013_sat
+## 1        82.10000 1020.000
+## 2        69.53333 1062.333
+## 3        57.65000 1261.000
+## 
+## Clustering vector:
+## [1] 2 3 3 1 2 2
+## 
+## Within cluster sum of squares by cluster:
+## [1]   0.0000 260.6733 290.4050
+##  (between_SS / total_SS =  99.1 %)
+## 
+## Available components:
+## 
+## [1] &quot;cluster&quot;      &quot;centers&quot;      &quot;totss&quot;        &quot;withinss&quot;     &quot;tot.withinss&quot;
+## [6] &quot;betweenss&quot;    &quot;size&quot;         &quot;iter&quot;         &quot;ifault&quot;</code></pre>
+<pre class="r"><code>kmeans2013clust &lt;- clust_dat2013 %&gt;% mutate(cluster = as.factor(kmeans2013$cluster))
+kmeans2013clust %&gt;% ggplot(aes(&quot;2013_admittance&quot;, &quot;2013_sat&quot;, 
+    color = cluster)) + geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" />
+For the 2013 data, there were three clusters of size two. There was a 95.4% compactness of the clustering, meaning that there was high similarity between the members in that same group. The cluster means for admittance percentages were 72, 66, and 164, while the cluster means for the average SAT scores were 1060.5, 1261, and 1043. This showed a high similarity between the average SAT scores that year, especially when compared to the admittance percentages, whose means were more scattered and dissimilar.</p>
+<pre class="r"><code>clust_dat2014 &lt;- datarenamed %&gt;% select(&quot;2014_admittance&quot;, &quot;2014_sat&quot;)
+kmeans2014 &lt;- clust_dat2014 %&gt;% kmeans(3)
+kmeans2014</code></pre>
+<pre><code>## K-means clustering with 3 clusters of sizes 2, 3, 1
+## 
+## Cluster means:
+##   2014_admittance 2014_sat
+## 1            61.1 1271.500
+## 2            75.2 1053.333
+## 3            86.9  988.000
+## 
+## Clustering vector:
+## [1] 2 1 1 3 2 2
+## 
+## Within cluster sum of squares by cluster:
+## [1] 979.7800 266.5267   0.0000
+##  (between_SS / total_SS =  98.4 %)
+## 
+## Available components:
+## 
+## [1] &quot;cluster&quot;      &quot;centers&quot;      &quot;totss&quot;        &quot;withinss&quot;     &quot;tot.withinss&quot;
+## [6] &quot;betweenss&quot;    &quot;size&quot;         &quot;iter&quot;         &quot;ifault&quot;</code></pre>
+<pre class="r"><code>kmeans2014clust &lt;- clust_dat2014 %&gt;% mutate(cluster = as.factor(kmeans2014$cluster))
+kmeans2014clust %&gt;% ggplot(aes(&quot;2014_admittance&quot;, &quot;2014_sat&quot;, 
+    color = cluster)) + geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" />
+For the 2014 data, there were three clusters of sizes 1, 1, and 4. There was a 89.1% compactness of the clustering, meaning that there was high similarity between the members in that same group, but less than in 2013. The cluster means for admittance percentages were 31, 133, and 145, while the cluster means for the average SAT scores were 1287, 1256, and 1037. This again showed a high similarity between the average SAT scores that year, especially when compared to the admittance percentages, whose means were more scattered and dissimilar. This repeated disparity could be explained by the unique looking data coming from UT Austin, which, as mentioned earlier, as an effect of being the main campus of the university has a significantly lower acceptance percentage due to the much greater volume of applicants it receives every year. So, while it has a similar average SAT score of applicants, albeit slightly higher, it’s acceptance percentage is much lower than the other campuses, skewing the cluster means.</p>
+<pre class="r"><code>clust_dat2019 &lt;- datarenamed %&gt;% select(&quot;2019_admittance&quot;, &quot;2019_sat&quot;)
+kmeans2019 &lt;- clust_dat2019 %&gt;% kmeans(3)
+kmeans2019</code></pre>
+<pre><code>## K-means clustering with 3 clusters of sizes 2, 2, 2
+## 
+## Cluster means:
+##   2019_admittance 2019_sat
+## 1           77.65   1128.0
+## 2           56.25   1344.5
+## 3           83.00   1155.0
+## 
+## Clustering vector:
+## [1] 3 2 2 1 1 3
+## 
+## Within cluster sum of squares by cluster:
+## [1]  10.205 999.545 128.020
+##  (between_SS / total_SS =  98.0 %)
+## 
+## Available components:
+## 
+## [1] &quot;cluster&quot;      &quot;centers&quot;      &quot;totss&quot;        &quot;withinss&quot;     &quot;tot.withinss&quot;
+## [6] &quot;betweenss&quot;    &quot;size&quot;         &quot;iter&quot;         &quot;ifault&quot;</code></pre>
+<pre class="r"><code>kmeans2019clust &lt;- clust_dat2019 %&gt;% mutate(cluster = as.factor(kmeans2019$cluster))
+kmeans2019clust %&gt;% ggplot(aes(&quot;2019_admittance&quot;, &quot;2019_sat&quot;, 
+    color = cluster)) + geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" />
+For the 2019 data, there were once again three clusters of size two. There was an 88% compactness of the clustering, meaning that there was high similarity between the members in that same group, but once again lower than in 2013, showing a decreasing trend in compactness over the years observed in this dataset. The cluster means for admittance percentages were 77.5, 171.5, and 137, while the cluster means for the average SAT scores were 1344.5, 1155, and 1128. Once again there is a high similarity between the average scores that year, especially when compared to the admittance percentages, whose means were more scattered and dissimilar. Comparing these means with those in 2013, you can see a mean increase in the average SAT score of applicants while the admittance percentages stay about the same. However, comparing 2019’s data with that from 2014 sees an increase in admittance percentage cluster means, possibly due to the differences in cluster size used in that k-means clustering.</p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
