@@ -1,0 +1,29 @@
+---
+title: Using Reticulate with Python and R
+author: ''
+date: '2021-05-09'
+slug: using-reticulate-with-python-and-r
+categories: []
+tags: []
+description: ''
+---
+```{r}
+library(reticulate)
+py_install("numpy")
+```
+To best explain the way that python and R work hand-in-hand, I've created this simple example below that explains the usefulness of "reticulate" when troubleshooting. 
+
+I used the numpy package in python to create two variables, x and y. They are 100 values pulled from a random normal sample of with a mean of  5 and a standard deviation of 1. When I tried to make a scatter plot, however, I ran into a set of error messages with python that I didn't know how to fix. I tried multiple help sites, but wasn't able to find a solution that I understood.
+```{python}
+import numpy as np
+x=np.random.normal(5,1,100)
+y=np.random.normal(5,1,100)
+```
+
+Thankfully, thanks to the "reticulate" function in R, I could easily just make my plot in R! I easily used ggplot in R to create a scatter plot of their interaction. It was really handy to be able make the variables in one language and still be able to use them when writing in another. 
+```{r}
+library(ggplot2)
+ggplot()+geom_point(aes(py$x,py$y))+xlab("Python Variable X")+ylab("Python Variable Y")+ggtitle("Scatterplot of X vs. Y")
+```
+
+![](/post/2021-05-09-using-reticulate-with-python-and-r_files/image.png)

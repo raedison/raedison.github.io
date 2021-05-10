@@ -8,12 +8,13 @@
     <language>en-US</language>
     <lastBuildDate>Sun, 09 May 2021 00:00:00 +0000</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Using Reticulate to Help R and Python Communicate</title>
-      <link>/post/2021/05/09/using-reticulate-to-help-r-and-python-communicate/</link>
+      <title>Using Reticulate with Python and R</title>
+      <link>/post/2021/05/09/using-reticulate-with-python-and-r/</link>
       <pubDate>Sun, 09 May 2021 00:00:00 +0000</pubDate>
       
-      <guid>/post/2021/05/09/using-reticulate-to-help-r-and-python-communicate/</guid>
-      <description></description>
+      <guid>/post/2021/05/09/using-reticulate-with-python-and-r/</guid>
+      <description>library(reticulate) py_install(&amp;quot;numpy&amp;quot;) To best explain the way that python and R work hand-in-hand, I’ve created this simple example below that explains the usefulness of “reticulate” when troubleshooting.
+I used the numpy package in python to create two variables, x and y. They are 100 values pulled from a random normal sample of with a mean of 5 and a standard deviation of 1. When I tried to make a scatter plot, however, I ran into a set of error messages with python that I didn’t know how to fix.</description>
     </item>
     
   </channel>
