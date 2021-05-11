@@ -148,7 +148,20 @@ summary(fit)
 The regression equation states that Mean Centered HP = -0.657 + 0.305(Centered Attack) + 0.054(Centered Defense). 0.305 is the slope for centered HP on centered Attack while holding centered Defense constant. 0.054 is the slope for centered HP on centered Defense while holding centered Attack constant. Then, I plotted the regression.
 
 ```{R}
-ggplot(poke, aes(x=Attack_c*Defense_c, y=HP_c))+geom_point()+  geom_smooth(method="lm",se=F,fullrange=T,) + ggtitle("Linear Regression of Predicting HP stats from Attack and Defense stats of Pokemon")
+new1<-poke
+new1$Attack_c<-mean(poke$Attack_c)
+new1$mean<-predict(fit,new1)
+new1$Attack_c<-mean(poke$Attack_c)+sd(poke$Attack_c)
+new1$plus.sd<-predict(fit,new1)
+new1$Attack_c<-mean(poke$Attack_c)-sd(poke$Attack_c)
+new1$minus.sd<-predict(fit,new1)
+newint<-new1%>%select(HP_c,Defense_c,mean,plus.sd,minus.sd)%>%gather(Attack_c,value,-HP_c,-Defense_c)
+
+mycols<-c("#619CFF","#F8766D","#00BA38")
+names(mycols)<-c("-1 sd","mean","+1 sd")
+mycols=as.factor(mycols)
+
+ggplot(poke,aes(Defense_c,HP_c),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color="mean"))+geom_line(data=new1,aes(y=plus.sd,color="+1 sd"))+geom_line(data=new1,aes(y=minus.sd,color="-1 sd"))+scale_color_manual(values=mycols)+labs(color="Attack_c")+theme(legend.position=c(.9,.2))+ggtitle("Interaction Plot")
 ```
 
 The proportion of variation in HP stats explained by Attack and Defense stats is the same as the R-squared value, which is 0.1836. 

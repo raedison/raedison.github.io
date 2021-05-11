@@ -254,7 +254,7 @@ Fs &lt;- replicate(5000,{
 hist(Fs, prob=T); abline(v=obs_F, col=&quot;red&quot;,add=T)</code></pre>
 <p><img src="../../project/project2_files/figure-html/unnamed-chunk-11-1.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>mean(Fs&gt;obs_F)</code></pre>
-<pre><code>## [1] 0.8338</code></pre>
+<pre><code>## [1] 0.8284</code></pre>
 <p>The p-value obtained was 0.83 which is again greater than 0.05, leading to failing to reject the null hypothesis, meaning that there is no significant difference between the Attack statistic from Generation to Generation.</p>
 </div>
 <div id="linear-regression-without-bootstrapped-standard-errors" class="section level2">
@@ -287,7 +287,20 @@ summary(fit)</code></pre>
 ## Multiple R-squared: 0.1866, Adjusted R-squared: 0.1836
 ## F-statistic: 60.88 on 3 and 796 DF, p-value: &lt; 2.2e-16</code></pre>
 <p>The regression equation states that Mean Centered HP = -0.657 + 0.305(Centered Attack) + 0.054(Centered Defense). 0.305 is the slope for centered HP on centered Attack while holding centered Defense constant. 0.054 is the slope for centered HP on centered Defense while holding centered Attack constant. Then, I plotted the regression.</p>
-<pre class="r"><code>ggplot(poke, aes(x=Attack_c*Defense_c, y=HP_c))+geom_point()+  geom_smooth(method=&quot;lm&quot;,se=F,fullrange=T,) + ggtitle(&quot;Linear Regression of Predicting HP stats from Attack and Defense stats of Pokemon&quot;)</code></pre>
+<pre class="r"><code>new1&lt;-poke
+new1$Attack_c&lt;-mean(poke$Attack_c)
+new1$mean&lt;-predict(fit,new1)
+new1$Attack_c&lt;-mean(poke$Attack_c)+sd(poke$Attack_c)
+new1$plus.sd&lt;-predict(fit,new1)
+new1$Attack_c&lt;-mean(poke$Attack_c)-sd(poke$Attack_c)
+new1$minus.sd&lt;-predict(fit,new1)
+newint&lt;-new1%&gt;%select(HP_c,Defense_c,mean,plus.sd,minus.sd)%&gt;%gather(Attack_c,value,-HP_c,-Defense_c)
+
+mycols&lt;-c(&quot;#619CFF&quot;,&quot;#F8766D&quot;,&quot;#00BA38&quot;)
+names(mycols)&lt;-c(&quot;-1 sd&quot;,&quot;mean&quot;,&quot;+1 sd&quot;)
+mycols=as.factor(mycols)
+
+ggplot(poke,aes(Defense_c,HP_c),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color=&quot;mean&quot;))+geom_line(data=new1,aes(y=plus.sd,color=&quot;+1 sd&quot;))+geom_line(data=new1,aes(y=minus.sd,color=&quot;-1 sd&quot;))+scale_color_manual(values=mycols)+labs(color=&quot;Attack_c&quot;)+theme(legend.position=c(.9,.2))+ggtitle(&quot;Interaction Plot&quot;)</code></pre>
 <p><img src="../../project/project2_files/figure-html/unnamed-chunk-13-1.png" width="768" style="display: block; margin: auto;" /></p>
 <p>The proportion of variation in HP stats explained by Attack and Defense stats is the same as the R-squared value, which is 0.1836.</p>
 <p>Next I looked at the assumptions for the linear regression I just performed. I started with linearity, testing for this by plotting the relationship between the centered data for Attack and HP and then Defense and HP. Both distributions showed linearity. As mentioned in prior parts, the observations are independent and while the sampling isn’t random, it’s bypassable for this project.</p>
@@ -324,7 +337,7 @@ fit_rse</code></pre>
 })
 samp_distn%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
 <pre><code>##   (Intercept)   Attack_c  Defense_c Attack_c:Defense_c
-## 1   0.8485434 0.03403668 0.03371174        0.001472464</code></pre>
+## 1    0.819548 0.03420583 0.03362398        0.001465904</code></pre>
 <pre class="r"><code>resids_boot &lt;-fit$residuals
 fitted_boot &lt;-fit$fitted.values
 resid_resamp &lt;- replicate(5000,{
@@ -335,7 +348,7 @@ resid_resamp &lt;- replicate(5000,{
 })
 resid_resamp%&gt;%t%&gt;%as.data.frame%&gt;%summarize_all(sd)</code></pre>
 <pre><code>##   (Intercept)   Attack_c  Defense_c Attack_c:Defense_c
-## 1   0.8812685 0.02830226 0.02922155       0.0007028976</code></pre>
+## 1   0.8725858 0.02785241 0.02936839       0.0007097425</code></pre>
 <p>The bootstrapped SEs are 0.8735 for the intercept, 0.0282 for the centered attack stat, 0.0287 for the centered defense stat. The bootstrapped SE for the intercept increased from the robust standard error and is slightly larger than the original unaltered standard error/ The bootstrapped SE for the centered attack stat decreased from the robust standard error, but increased slightly from the unaltered standard error. The bootstrapped SE for the centered defense stat decreased compared to both the robust and unaltered standard errors.</p>
 </div>
 <div id="logistic-regression-predicting-a-binary-variable-from-two-explanatory-variable-with-no-interaction" class="section level2">
@@ -399,8 +412,8 @@ class_diag(prob_log_all,pokeclean$Legendary)</code></pre>
 <pre class="r"><code>library(randomForest) 
 fit_rf=randomForest(Legendary~.,data=pokeclean)
 class_diag(fit_rf$votes[,2],pokeclean$Legendary)</code></pre>
-<pre><code>##    acc      sens      spec       ppv       auc
-## 1 0.95 0.4769231 0.9918367 0.8378378 0.9745055</code></pre>
+<pre><code>##      acc      sens      spec       ppv      auc
+## 1 0.9475 0.4769231 0.9891156 0.7948718 0.974338</code></pre>
 <pre class="r"><code>set.seed(1234)
 k=10
 
